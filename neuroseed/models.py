@@ -61,25 +61,25 @@ class Model:
             self.arch_id = resp.json()['id']
             return self.arch_id
 
-        raise ValueError('Status code: {}'.format(resp.status_code))
+        error = resp.json().get('error', '')
+        raise ValueError('Status code: {}, {}'.format(resp.status_code, error))
 
     def _create_model(self, arch_id):
         url = BASE + '/model'
 
         json = {
             "is_public": False,
-            "meta":{
-                "title": "model {}".format(id(self)),
-                "architecture": arch_id,
-            }
+            "title": "model {}".format(id(self)),
+            "architecture": arch_id,
         }
         resp = requests.post(url, json=json)
 
         if resp.status_code == 200:
-            self._model_id = resp.json()['model']['_id']
+            self._model_id = resp.json()['id']
             return self._model_id
 
-        raise ValueError('Status code: {}'.format(resp.status_code))
+        error = resp.json().get('error', '')
+        raise ValueError('Status code: {}, {}'.format(resp.status_code, error))
 
     def _train_model(self):
         url = BASE + '/model/{id}/train'.format(id=self._model_id)
@@ -92,14 +92,14 @@ class Model:
 
         resp = requests.post(url, json=json)
         if resp.status_code == 200:
-            self._task_id = resp.json()['task']
+            self._task_id = resp.json()['id']
             return self._task_id
 
-        raise ValueError('Status code: {}'.format(resp.status_code))
+        raise ValueError('Status code: {}, {}'.format(resp.status_code, resp.text))
 
-    def compile(self, optimizer, loss, metrics=None):
+    def compile(self, optimizer, loss, metrics=()):
         self._optimizer = optimizer
-        self._loss = loss,
+        self._loss = loss
         self._metrics = metrics
 
         arch_id = self._create_architecture()
