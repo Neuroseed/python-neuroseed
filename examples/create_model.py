@@ -10,8 +10,9 @@ x = layers.Flatten()(x)
 x = layers.Dense(10)(x)
 
 model = models.Model(input, x)
+model.summary()
 
-print('Config:', model.get_config())
+#print('Config:', model.get_config())
 
 model.compile(optimizer="sgd", loss='mean_squared_error')
 model.fit("d1")

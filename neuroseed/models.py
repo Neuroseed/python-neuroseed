@@ -1,4 +1,5 @@
 import requests
+import shutil
 
 HOST = 'http://localhost:8080'
 BASE = HOST + '/api/v1'
@@ -22,8 +23,24 @@ class Model:
         config = map(lambda layer: layer.get_config(), layers)
         return tuple(config)
 
-    def summary(self):
-        pass
+    def summary(self, line_length=None):
+        line_length = line_length or shutil.get_terminal_size().columns
+        fields = ['Layer (type)', 'Output Shape', 'Param', 'Connected']
+        columns_number = len(fields)
+
+        def print_row(fields):
+            line = ''
+            for i, field in enumerate(fields):
+                line += field
+                line += ' ' * (line_length // columns_number * (i+1) - len(line))
+            print(line)
+
+        print_row(fields)
+        print('=' * line_length)
+
+        for layer in self.get_config():
+            print_row([layer['name'], '-', '-', '-'])
+            print('_' * line_length)
 
     def _create_architecture(self):
         url = BASE + '/architecture'

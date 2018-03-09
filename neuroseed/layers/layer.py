@@ -26,6 +26,6 @@ class Layer:
     def get_config(self):
         data = {'name': self.__class__.__name__}
         ext = utils.extract_schema(self.__dict__, self.schema)
-        print('Ext:', ext)
         data.update(ext)
         return data
+
