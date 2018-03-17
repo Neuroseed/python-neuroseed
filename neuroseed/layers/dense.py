@@ -10,7 +10,7 @@ class Dense(Layer):
             "use_bias": {"type": "boolean"},
             "kernel_initializer": {"type": "string"},
             "bias_initializer": {"type": "string"},
-            "kerel_reqularizer": {"type": "string"},
+            "kernel_regularizer": {"type": "string"},
             "bias_regularizer": {"type": "string"},
             "activity_regularizer": {"type": "string"},
             "kernel_constraint": {"type": "string"},
