@@ -20,7 +20,7 @@ model.summary()
 
 #print('Config:', model.get_config())
 
-model.compile(optimizer="sgd", loss='mean_squared_error')
+model.compile(optimizer="SGD", loss='mean_squared_error')
 
 DATASET = input('Enter dataset ID: ')
 model.fit(DATASET)

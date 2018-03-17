@@ -24,8 +24,10 @@ class Layer:
         return self._inbound_node
 
     def get_config(self):
-        data = {'name': self.__class__.__name__}
-        ext = utils.extract_schema(self.__dict__, self.schema)
-        data.update(ext)
-        return data
+        name = self.__class__.__name__
+        config = utils.extract_schema(self.__dict__, self.schema)
 
+        return {
+            'name': name,
+            'config': config
+        }

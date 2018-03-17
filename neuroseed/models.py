@@ -99,9 +99,12 @@ class Model:
         url = BASE + '/model/{id}/train'.format(id=self._model_id)
         json = {
             'dataset': self._dataset_id,
-            'optimizer': self._optimizer,
+            'optimizer': {
+                'name': self._optimizer,
+                'config': {}
+            },
             'loss': self._loss,
-            'metrics': self._metrics
+            'metrics': list(self._metrics)
         }
         headers = authorization.get_auth_headers()
 
