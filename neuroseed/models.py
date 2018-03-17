@@ -1,5 +1,8 @@
 import requests
 import shutil
+from json.decoder import JSONDecodeError
+
+from . import authorization
 
 HOST = 'http://localhost:8080'
 BASE = HOST + '/api/v1'
@@ -54,14 +57,19 @@ class Model:
             "title": "arch {}".format(id(self)),
             "architecture": architecture
         }
+        headers = authorization.get_auth_headers()
 
-        resp = requests.post(url, json=json)
+        resp = requests.post(url, json=json, headers=headers)
 
         if resp.status_code == 200:
             self.arch_id = resp.json()['id']
             return self.arch_id
 
-        error = resp.json().get('error', '')
+        try:
+            error = resp.json().get('error', '')
+        except JSONDecodeError:
+            error = resp.text
+
         raise ValueError('Status code: {}, {}'.format(resp.status_code, error))
 
     def _create_model(self, arch_id):
@@ -72,13 +80,19 @@ class Model:
             "title": "model {}".format(id(self)),
             "architecture": arch_id,
         }
-        resp = requests.post(url, json=json)
+        headers = authorization.get_auth_headers()
+
+        resp = requests.post(url, json=json, headers=headers)
 
         if resp.status_code == 200:
             self._model_id = resp.json()['id']
             return self._model_id
 
-        error = resp.json().get('error', '')
+        try:
+            error = resp.json().get('error', '')
+        except JSONDecodeError:
+            error = resp.text
+
         raise ValueError('Status code: {}, {}'.format(resp.status_code, error))
 
     def _train_model(self):
@@ -89,13 +103,19 @@ class Model:
             'loss': self._loss,
             'metrics': self._metrics
         }
+        headers = authorization.get_auth_headers()
 
-        resp = requests.post(url, json=json)
+        resp = requests.post(url, json=json, headers=headers)
         if resp.status_code == 200:
             self._task_id = resp.json()['id']
             return self._task_id
 
-        raise ValueError('Status code: {}, {}'.format(resp.status_code, resp.text))
+        try:
+            error = resp.json().get('error', '')
+        except JSONDecodeError:
+            error = resp.text
+
+        raise ValueError('Status code: {}, {}'.format(resp.status_code, error))
 
     def compile(self, optimizer, loss, metrics=()):
         self._optimizer = optimizer

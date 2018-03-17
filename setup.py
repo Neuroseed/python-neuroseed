@@ -1,9 +1,8 @@
 from setuptools import setup, find_packages
-import neuroseed
 
 setup(
     name='neuroseed',
-    version=neuroseed.__version__,
+    version='0.2.0',
     description='Neuroseed platform REST API wrapper',
     author='Ihor Omelchenko',
     author_email='counter3d@gmail.com',
@@ -14,6 +13,9 @@ setup(
         'Programming Language :: Python :: 3'
     ],
     packages=find_packages(exclude=['examples', 'docs', 'tests']),
-    install_requires=['requests']
+    install_requires=[
+        'requests==2.18.1',
+        'jsonschema==2.6.0'
+    ]
 )
 

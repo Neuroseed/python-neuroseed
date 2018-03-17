@@ -16,4 +16,3 @@ def extract_schema(dict, schema):
     data = {key:dict[key] for key in fields if key in dict}
     jsonschema.validate(data, schema)
     return data
-
