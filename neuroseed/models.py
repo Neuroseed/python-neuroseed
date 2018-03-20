@@ -1,11 +1,9 @@
-import requests
 import shutil
 from json.decoder import JSONDecodeError
 
-from . import authorization
+from . import utils
 
-HOST = 'http://localhost:8080'
-BASE = HOST + '/api/v1'
+BASE = '/api/v1'
 
 
 class Model:
@@ -57,9 +55,8 @@ class Model:
             "title": "arch {}".format(id(self)),
             "architecture": architecture
         }
-        headers = authorization.get_auth_headers()
 
-        resp = requests.post(url, json=json, headers=headers)
+        resp = utils.post(url, json=json)
 
         if resp.status_code == 200:
             self.arch_id = resp.json()['id']
@@ -80,9 +77,8 @@ class Model:
             "title": "model {}".format(id(self)),
             "architecture": arch_id,
         }
-        headers = authorization.get_auth_headers()
 
-        resp = requests.post(url, json=json, headers=headers)
+        resp = utils.post(url, json=json)
 
         if resp.status_code == 200:
             self._model_id = resp.json()['id']
@@ -106,9 +102,8 @@ class Model:
             'loss': self._loss,
             'metrics': list(self._metrics)
         }
-        headers = authorization.get_auth_headers()
 
-        resp = requests.post(url, json=json, headers=headers)
+        resp = utils.post(url, json=json)
         if resp.status_code == 200:
             self._task_id = resp.json()['id']
             return self._task_id

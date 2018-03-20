@@ -1,17 +1,23 @@
 
+HOST = 'http://api.neuroseed.net'
 AUTH_TOKEN = None
+
 
 class NotAuthorized(Exception):
     pass
 
 
-def authorize(token):
-    global AUTH_TOKEN
+def authorize(token, host=None):
+    global AUTH_TOKEN, HOST
 
     if not type(token) is str:
         raise TypeError('Type of token must be str')
 
+    if not type(host) is str:
+        raise TypeError('Type of host must be str')
+
     AUTH_TOKEN = token
+    HOST = HOST or host
 
 
 def is_authorized():
