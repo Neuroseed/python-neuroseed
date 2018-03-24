@@ -1,6 +1,7 @@
 import shutil
 from json.decoder import JSONDecodeError
 
+from . import datasets
 from . import utils
 
 BASE = '/api/v1'
@@ -94,7 +95,7 @@ class Model:
     def _train_model(self):
         url = BASE + '/model/{id}/train'.format(id=self._model_id)
         json = {
-            'dataset': self._dataset_id,
+            'dataset': self._dataset.id,
             'optimizer': {
                 'name': self._optimizer,
                 'config': {}
@@ -125,16 +126,22 @@ class Model:
 
         self._is_compiled = True
 
-    def fit(self, dataset_id, batch_size=None, epochs=1, verbose=1, callbacks=None, sync=False):
+    def fit(self, dataset, batch_size=None, epochs=1, verbose=1, callbacks=None, sync=False):
         if not self._is_compiled:
             raise RuntimeError('Model is not compiled')
 
-        self._dataset_id = dataset_id
+        if type(dataset) is str:
+            dataset = datasets.get_datasets()[dataset]
+
+        if not isinstance(datasets, datasets.Dataset):
+            raise TypeError('dataset type must be Dataset')
+
+        self._dataset = dataset
         self._train_model()
 
-    def evaluate(self, dataset_id, verbose=0):
+    def evaluate(self, dataset, verbose=0):
         pass
 
-    def predict(self, dataset_id, verbose=0):
+    def predict(self, dataset, verbose=0):
         pass
 
