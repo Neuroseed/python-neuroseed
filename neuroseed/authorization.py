@@ -17,7 +17,7 @@ def authorize(token, host=None):
         raise TypeError('Type of host must be str')
 
     AUTH_TOKEN = token
-    HOST = HOST or host
+    HOST = host or HOST
 
 
 def is_authorized():
