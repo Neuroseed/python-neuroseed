@@ -1,4 +1,5 @@
 import jsonschema
+from requests_toolbelt.multipart import encoder
 
 from . import utils
 from .schema.dataset import DATASET_SCHEMA
@@ -95,6 +96,25 @@ class Dataset:
 
     def _upload_file(self):
         print(f'Upload file {self._file_path}')
+
+        url = BASE + f'/dataset/{self.id}'
+
+        with open(self._file_path, 'rb') as f:
+            form = encoder.MultipartEncoder({
+                "file": (self._file_path, f, "text/plain")
+            })
+
+            headers = {
+                "Prefer": "respond-async",
+                "Content-Type": form.content_type,
+            }
+
+            resp = utils.post(url, headers=headers, data=form, stream=True)
+
+            if resp.status_code == 200:
+                self._is_uploaded = True
+            else:
+                raise RuntimeError(f'code {resp.status_code}, {resp.text}')
 
     def upload(self, file_path=None):
         self._file_path = self._file_path or file_path

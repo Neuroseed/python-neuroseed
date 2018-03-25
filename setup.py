@@ -21,7 +21,8 @@ def find_version(*file_paths):
 
 requires = [
         'requests==2.18.1',
-        'jsonschema==2.6.0'
+        'jsonschema==2.6.0',
+        'requests-toolbelt==0.8.0'
 ]
 
 tests_require = []
