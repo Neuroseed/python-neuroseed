@@ -1,39 +1,10 @@
 import time
-import functools
 
+from .dataset import Dataset
 from . import utils
 
 BASE = '/api/v1'
 EXPIRE_TIME = 1
-
-
-class Dataset:
-    def __init__(self, id):
-        if not type(id) is str:
-            raise TypeError('id type must be str')
-
-        self.id = id
-        self.metadata = None
-
-        self.load_metadata()
-
-    def __str__(self):
-        return f'<neuroseed.datasets.Dataset with id {self.id}>'
-
-    def __repr__(self):
-        return f'<neuroseed.datasets.Dataset with id {self.id}>'
-
-    def load_metadata(self):
-        url = BASE + f'/dataset/{self.id}'
-        result = utils.get(url)
-
-        if result.status_code == 200:
-            self.metadata = result.json()
-        else:
-            raise ValueError(f'Status code {result.status_code}')
-
-    def __getattr__(self, item):
-        return self.metadata[item]
 
 
 class Datasets:
@@ -41,8 +12,6 @@ class Datasets:
         self._ids = []
         self._datasets = {}
         self._ids_expire = 0
-
-        self._update()
 
     @property
     def ids(self):
@@ -57,9 +26,13 @@ class Datasets:
         return json
 
     def __str__(self):
+        self._update()
+
         return str([f'<neuroseed.datasets.Dataset with id {id}>' for id in self._ids])
 
     def __repr__(self):
+        self._update()
+
         return repr([f'<neuroseed.datasets.Dataset with id {id}>' for id in self._ids])
 
     def __getitem__(self, id):
@@ -80,7 +53,7 @@ class Datasets:
         if id in self._datasets:
             return self._datasets[id]
 
-        dataset = Dataset(id)
+        dataset = Dataset(id=id)
         self._datasets[id] = dataset
         return dataset
 
@@ -96,7 +69,7 @@ class Datasets:
         if id in self._datasets:
             return self._datasets[id]
 
-        dataset = Dataset(id)
+        dataset = Dataset(id=id)
         self._datasets[id] = dataset
         return dataset
 
@@ -113,6 +86,4 @@ class Datasets:
         return ids
 
 
-@functools.lru_cache(1)
-def get_datasets():
-    return Datasets()
+datasets = Datasets()

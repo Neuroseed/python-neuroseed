@@ -8,5 +8,6 @@ HOST = 'http://localhost:8080'
 
 neuroseed.authorize(TOKEN, HOST)
 
-ds = neuroseed.datasets
-print('Datasets:', ds)
+dataset = neuroseed.dataset.Dataset()
+dataset.title = 'title'
+dataset.upload()

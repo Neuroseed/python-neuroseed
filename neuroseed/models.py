@@ -1,7 +1,7 @@
 import shutil
 from json.decoder import JSONDecodeError
 
-from . import datasets
+from .datasets_registry import datasets
 from . import utils
 
 BASE = '/api/v1'
@@ -131,7 +131,7 @@ class Model:
             raise RuntimeError('Model is not compiled')
 
         if type(dataset) is str:
-            dataset = datasets.get_datasets()[dataset]
+            dataset = datasets[dataset]
 
         if not isinstance(datasets, datasets.Dataset):
             raise TypeError('dataset type must be Dataset')
