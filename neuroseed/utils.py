@@ -1,5 +1,6 @@
 import requests
 import jsonschema
+from jsonschema import validate
 
 from . import authorization
 
@@ -21,7 +22,7 @@ def extract_schema(dict, schema):
 
 
 def get(url, *args, **kwargs):
-    url = authorization.HOST + '/' + url
+    url = authorization.HOST + url
 
     headers = kwargs.setdefault('headers', {})
     auth_headers = authorization.get_auth_headers()
@@ -31,7 +32,7 @@ def get(url, *args, **kwargs):
 
 
 def post(url, *args, **kwargs):
-    url = authorization.HOST + '/' + url
+    url = authorization.HOST + url
 
     headers = kwargs.setdefault('headers', {})
     auth_headers = authorization.get_auth_headers()

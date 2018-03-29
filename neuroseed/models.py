@@ -1,6 +1,7 @@
 import shutil
 from json.decoder import JSONDecodeError
 
+from .dataset import Dataset
 from .datasets_registry import datasets
 from . import utils
 
@@ -70,13 +71,14 @@ class Model:
 
         raise ValueError('Status code: {}, {}'.format(resp.status_code, error))
 
-    def _create_model(self, arch_id):
+    def _create_model(self, arch_id, dataset_id):
         url = BASE + '/model'
 
         json = {
             "is_public": False,
             "title": "model {}".format(id(self)),
             "architecture": arch_id,
+            "dataset": dataset_id
         }
 
         resp = utils.post(url, json=json)
@@ -85,17 +87,12 @@ class Model:
             self._model_id = resp.json()['id']
             return self._model_id
 
-        try:
-            error = resp.json().get('error', '')
-        except JSONDecodeError:
-            error = resp.text
+        raise ValueError('Status code: {}, {}'.format(resp.status_code, resp.text))
 
-        raise ValueError('Status code: {}, {}'.format(resp.status_code, error))
-
-    def _train_model(self):
+    def _train_model(self, epochs=1):
         url = BASE + '/model/{id}/train'.format(id=self._model_id)
         json = {
-            'dataset': self._dataset.id,
+            'epochs': epochs,
             'optimizer': {
                 'name': self._optimizer,
                 'config': {}
@@ -109,20 +106,49 @@ class Model:
             self._task_id = resp.json()['id']
             return self._task_id
 
-        try:
-            error = resp.json().get('error', '')
-        except JSONDecodeError:
-            error = resp.text
+        raise ValueError('Status code: {}, {}'.format(resp.status_code, resp.text))
 
-        raise ValueError('Status code: {}, {}'.format(resp.status_code, error))
+    def _wait_train(self, task_id):
+        import time
+
+        while True:
+            url = BASE + '/model/train/{task_id}/history'.format(task_id=task_id)
+            result = utils.get(url)
+
+            if result.status_code == 200:
+                history = result.json()
+
+                batches = history.get('batches', None)
+                current_batch = history.get('current_batch', None)
+
+                epochs = history.get('epochs', None)
+                current_epoch = history.get('current_epoch', None)
+
+                batches_in_epoch = history.get('batches_in_epoch', None)
+                current_batch_in_epoch = history.get('current_batch_in_epoch', None)
+
+                if batches and current_batch and epochs and current_epoch:
+                    percent = current_batch_in_epoch / batches_in_epoch
+                    length = 60
+                    llen = int(length * percent)
+                    rlen = int(length * (1 - percent))
+                    progress = '[' + '=' * llen + ' ' * rlen + ']'
+
+                    metrics = ' - '.join(['{key}: {value}'.format(key=key, value=value[-1]) for key, value in history['batch'].items()])
+
+                    print('Epoch {}/{}'.format(current_epoch, epochs))
+                    print('{}/{} {} - {}'.format(current_batch_in_epoch, batches_in_epoch, progress, metrics))
+            else:
+                print(result.status_code, result.text)
+
+            time.sleep(1)
 
     def compile(self, optimizer, loss, metrics=()):
         self._optimizer = optimizer
         self._loss = loss
         self._metrics = metrics
 
-        arch_id = self._create_architecture()
-        self._create_model(arch_id)
+        self.arch_id = self._create_architecture()
 
         self._is_compiled = True
 
@@ -133,11 +159,13 @@ class Model:
         if type(dataset) is str:
             dataset = datasets[dataset]
 
-        if not isinstance(datasets, datasets.Dataset):
+        if not isinstance(dataset, Dataset):
             raise TypeError('dataset type must be Dataset')
 
         self._dataset = dataset
-        self._train_model()
+        self._create_model(self.arch_id, dataset.id)
+        task_id = self._train_model(epochs)
+        self._wait_train(task_id)
 
     def evaluate(self, dataset, verbose=0):
         pass
