@@ -137,6 +137,9 @@ class Model:
 
                     print('Epoch {}/{}'.format(current_epoch, epochs))
                     print('{}/{} {} - {}'.format(current_batch_in_epoch, batches_in_epoch, progress, metrics))
+            elif result.status_code == 201:
+                print('Model is trained')
+                return
             else:
                 print(result.status_code, result.text)
 
@@ -164,7 +167,13 @@ class Model:
         self._dataset = dataset
         self._create_model(self.arch_id, dataset.id)
         task_id = self._train_model(epochs)
-        self._wait_train(task_id)
+
+        try:
+            self._wait_train(task_id)
+        except KeyboardInterrupt:
+            utils.delete_task(task_id)
+            print('Task is stopped')
+            raise
 
     def evaluate(self, dataset, verbose=0):
         pass

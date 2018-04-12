@@ -21,6 +21,17 @@ def extract_schema(dict, schema):
     return data
 
 
+def delete_task(task_id):
+    url = '/api/v1/task/{id}'.format(id=task_id)
+
+    result = delete(url)
+
+    if result.status_code == 200:
+        return
+
+    raise RuntimeError('Status code', result.status_code)
+
+
 def get(url, *args, **kwargs):
     url = authorization.HOST + url
 
@@ -39,3 +50,13 @@ def post(url, *args, **kwargs):
     headers.update(auth_headers)
 
     return requests.post(url, *args, **kwargs)
+
+
+def delete(url, *args, **kwargs):
+    url = authorization.HOST + url
+
+    headers = kwargs.setdefault('headers', {})
+    auth_headers = authorization.get_auth_headers()
+    headers.update(auth_headers)
+
+    return requests.delete(url, *args, **kwargs)
