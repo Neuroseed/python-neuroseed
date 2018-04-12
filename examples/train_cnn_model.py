@@ -11,9 +11,9 @@ neuroseed.authorize(TOKEN, HOST)
 
 # create model
 inp = layers.Conv2D(32, [3, 3])
-x = layers.MaxPooling2D()(inp)
+x = layers.MaxPooling2D([2, 2])(inp)
 x = layers.Conv2D(32, [3, 3])(x)
-x = layers.MaxPooling2D()(x)
+x = layers.MaxPooling2D([2, 2])(x)
 x = layers.Flatten()(x)
 x = layers.Dense(10)(x)
 

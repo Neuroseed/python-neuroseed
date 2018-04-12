@@ -52,7 +52,6 @@ class Model:
             'layers': self.get_config()
         }
         json = {
-            "id": str(id(self)),
             "is_public": False,
             "title": "arch {}".format(id(self)),
             "architecture": architecture
