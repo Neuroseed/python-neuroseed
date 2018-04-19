@@ -8,6 +8,8 @@ EXPIRE_TIME = 1
 
 
 class Datasets:
+    """Datasets registry remote proxy singleton"""
+
     def __init__(self):
         self._ids = []
         self._datasets = {}

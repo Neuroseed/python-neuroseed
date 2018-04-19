@@ -8,6 +8,15 @@ BASE = '/api/v1'
 
 
 class Dataset:
+    """Dataset remote proxy to MVP Dataset resource
+    
+    Kwargs:
+        *: Dataset json-schema kwargs
+        
+    Raises:
+        TypeError
+    """
+
     def __init__(self, **kwargs):
         self._id = None
         self._metadata = {}
@@ -28,6 +37,8 @@ class Dataset:
 
     @classmethod
     def from_id(cls, id):
+        """Get dataset by it's id"""
+
         if not type(id) is str:
             raise TypeError('id type must be str')
 
@@ -117,6 +128,19 @@ class Dataset:
                 raise RuntimeError(f'code {resp.status_code}, {resp.text}')
 
     def upload(self, file_path=None):
+        """Upload dataset hdf5 file
+        
+        Args:
+            file_path (str): Path to dataset hdf5 file
+            
+        Raises:
+            TypeError
+            RuntimeError
+        """
+
+        if not isinstance(file_path, (str, type(None))):
+            raise TypeError('type of file_path must be str')
+
         self._file_path = self._file_path or file_path
 
         self._create_metadata()

@@ -3,18 +3,41 @@ from json.decoder import JSONDecodeError
 
 from .dataset import Dataset
 from .datasets_registry import datasets
+from . import layers
 from . import utils
 
 BASE = '/api/v1'
 
 
 class Model:
+    """Model remote proxy to MVP Model resource with Keras-like interface
+    
+    Args:
+        input (layers.Layer): Model input layer
+        output (layers.Layer): Model output layer
+        
+    Raises:
+        TypeError
+    """
+
     def __init__(self, input, output):
+        if not isinstance(input, layers.Layer):
+            raise TypeError('type of input must be layers.Layer')
+
+        if not isinstance(output, layers.Layer):
+            raise TypeError('type of output must be layers.Layer')
+
         self._is_compiled = False
         self.input = input
         self.output = output
 
     def get_config(self):
+        """Return model config
+        
+        Returns:
+            tuple
+        """
+
         def get_layers(layer):
             if layer:
                 return get_layers(layer.inbound_node) + (layer,)
@@ -27,6 +50,8 @@ class Model:
         return tuple(config)
 
     def summary(self, line_length=None):
+        """Print model summary"""
+
         line_length = line_length or shutil.get_terminal_size().columns
         fields = ['Layer (type)', 'Output Shape', 'Param', 'Connected']
         columns_number = len(fields)
@@ -146,6 +171,8 @@ class Model:
             time.sleep(1)
 
     def compile(self, optimizer, loss, metrics=()):
+        """Compile model. For keras-like interface"""
+
         self._optimizer = optimizer
         self._loss = loss
         self._metrics = metrics
@@ -155,6 +182,23 @@ class Model:
         self._is_compiled = True
 
     def fit(self, dataset, batch_size=None, epochs=1, verbose=1, callbacks=None, sync=False):
+        """Train model on dataset
+        
+        Args:
+            dataset (dataset.Dataset): Dataset proxy
+            
+        Kwargs:
+            batch_size (int): Batch size
+            epochs (int): Number of training epochs
+            verbose (int): Logging verbose level
+            callbacks (list): Training callbacks
+            sync (bool): Wait for end training
+            
+        Raises:
+            RuntimeError
+            TypeError
+        """
+
         if not self._is_compiled:
             raise RuntimeError('Model is not compiled')
 

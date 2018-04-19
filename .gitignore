@@ -1,6 +1,7 @@
 build
 dist
 neuroseed.egg-info
+docs/build
 venv
 .idea
 __pycache__

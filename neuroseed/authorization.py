@@ -7,7 +7,22 @@ class NotAuthorized(Exception):
     pass
 
 
-def authorize(token, host=None):
+def authorize(token: str, host: str=None):
+    """Authorize on Neuroseed MVP by authorization token
+    
+    Args:
+        token (str): The authorization token
+    
+    Kwargs:
+        host (str): Neuroseed MVP server host
+     
+    Returns:
+        None
+        
+    Raises:
+        TypeError
+    """
+
     global AUTH_TOKEN, HOST
 
     if not type(token) is str:
@@ -21,15 +36,39 @@ def authorize(token, host=None):
 
 
 def is_authorized():
+    """Check if authorized on Neuroseed MVP
+    
+    Returns:
+        bool
+    """
+
     return bool(AUTH_TOKEN)
 
 
 def assert_authorization():
+    """Assert authorization on Neuroseed MVP
+    
+    Returns:
+         None
+         
+    Raises:
+        NotAuthorized
+    """
+
     if not is_authorized():
         raise NotAuthorized('Not authorized on Neuroseed platform')
 
 
 def get_auth_headers():
+    """Return JWT authorization header
+    
+    Returns:
+        dict
+    
+    Raises:
+        NotAuthorized
+    """
+
     assert_authorization()
 
     return {
