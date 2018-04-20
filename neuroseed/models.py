@@ -135,6 +135,8 @@ class Model:
     def _wait_train(self, task_id):
         import time
 
+        old_epoch = -1
+
         while True:
             url = BASE + '/model/train/{task_id}/history'.format(task_id=task_id)
             result = utils.get(url)
@@ -142,26 +144,39 @@ class Model:
             if result.status_code == 200:
                 history = result.json()
 
-                batches = history.get('batches', None)
-                current_batch = history.get('current_batch', None)
+                examples = history.get('examples', None)
+                current_example = history.get('current_example', None)
 
                 epochs = history.get('epochs', None)
                 current_epoch = history.get('current_epoch', None)
 
-                batches_in_epoch = history.get('batches_in_epoch', None)
-                current_batch_in_epoch = history.get('current_batch_in_epoch', None)
-
-                if batches and current_batch and epochs and current_epoch:
-                    percent = current_batch_in_epoch / batches_in_epoch
+                if examples and epochs:
+                    percent = current_example / examples
                     length = 60
                     llen = int(length * percent)
                     rlen = int(length * (1 - percent))
-                    progress = '[' + '=' * llen + ' ' * rlen + ']'
+                    progress = '[' + '=' * llen + '>' + ' ' * (rlen - 1) + ']'
 
-                    metrics = ' - '.join(['{key}: {value}'.format(key=key, value=value[-1]) for key, value in history['batch'].items()])
+                    eta = 999
+                    metrics = 'no batch metrics'
 
-                    print('Epoch {}/{}'.format(current_epoch, epochs))
-                    print('{}/{} {} - {}'.format(current_batch_in_epoch, batches_in_epoch, progress, metrics))
+                    if current_epoch != old_epoch:
+                        old_epoch = current_epoch
+                        epoch_metrics = ''
+                        if current_epoch > 0:
+                            epoch_metrics = '-' + ' - '.join(['{key}: {value}'.format(key=key, value=value[-1]) for key, value in history['epoch'].items()])
+
+                        print('Epoch {current}/{epochs} {metrics}'.format(
+                            current=current_epoch,
+                            epochs=epochs,
+                            metrics=epoch_metrics))
+
+                    print('{current}/{examples} {progress} - ETA: {eta}s - {metrics}'.format(
+                        current=current_example,
+                        examples=examples,
+                        progress=progress,
+                        eta=eta,
+                        metrics=metrics))
             elif result.status_code == 201:
                 print('Model is trained')
                 return
